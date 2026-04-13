@@ -206,7 +206,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px;
     <div class="place-block-title" id="placeTitle">Tempat ditemukan</div>
     <div id="placeList"></div>
     <div class="data-note">
-      Data dari <a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a>. Mungkin belum 100% lengkap — terutama tempat baru atau yang belum didaftarkan ke OSM. Hasilnya bisa berbeda dari Google Maps.
+      Data dari <a href="https://maps.google.com" target="_blank">Google Maps</a> via Places API. Hasil lebih akurat dan lengkap.
     </div>
     <div class="action-row">
       <button class="btn-action" onclick="shareResult()">Salin & Bagikan</button>
@@ -216,7 +216,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px;
 </div>
 
 <div class="footer">
-  Powered by <a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a> &amp; <a href="https://overpass-api.de" target="_blank">Overpass API</a>
+  Powered by <a href="https://maps.google.com" target="_blank">Google Maps</a> Places API
 </div>
 
 <div class="toast" id="toast">Tersalin!</div>
@@ -269,73 +269,6 @@ const CAPTIONS = {
     { min:2,  max:5,  badge:"Banking zone",        title:"Lumayan banyak",        sub:"Cari ATM ga susah-susah amat. Antrian masih wajar." },
     { min:6,  max:999,badge:"Financial District",  title:"FINANCIAL DISTRICT",    sub:"ATM di mana-mana. Uang keluar, uang keluar, uang keluar... dompet menangis." }
   ]
-};
-
-// ─── OVERPASS QUERIES (wider net — name keywords + tags) ────
-// Strategy: union of (a) proper OSM tags + (b) name keyword search
-// This catches places that exist but are tagged inconsistently
-const QUERIES = {
-  padel: (r, lat, lon) => `
-    node["leisure"="sports_centre"](around:${r},${lat},${lon});
-    way["leisure"="sports_centre"](around:${r},${lat},${lon});
-    node["sport"="padel"](around:${r},${lat},${lon});
-    node["sport"="tennis"](around:${r},${lat},${lon});
-    node["leisure"="pitch"]["sport"~"padel|tennis|badminton|squash"](around:${r},${lat},${lon});
-    node["name"~"padel|sport|arena|court|fitness|gym|olahraga|badminton",i](around:${r},${lat},${lon});
-    way["name"~"padel|sport|arena|fitness|gym|olahraga",i](around:${r},${lat},${lon});`,
-
-  mosque: (r, lat, lon) => `
-    node["amenity"="place_of_worship"]["religion"="muslim"](around:${r},${lat},${lon});
-    way["amenity"="place_of_worship"]["religion"="muslim"](around:${r},${lat},${lon});
-    node["amenity"="place_of_worship"]["name"~"masjid|musholla|mushalla|surau|langgar",i](around:${r},${lat},${lon});
-    way["amenity"="place_of_worship"]["name"~"masjid|musholla|mushalla|surau|langgar",i](around:${r},${lat},${lon});
-    node["name"~"^masjid|^musholla|^mushalla|^surau|^langgar",i](around:${r},${lat},${lon});
-    way["name"~"^masjid|^musholla|^mushalla|^surau|^langgar",i](around:${r},${lat},${lon});`,
-
-  school: (r, lat, lon) => `
-    node["amenity"="school"](around:${r},${lat},${lon});
-    way["amenity"="school"](around:${r},${lat},${lon});
-    node["amenity"="kindergarten"](around:${r},${lat},${lon});
-    way["amenity"="kindergarten"](around:${r},${lat},${lon});
-    node["amenity"="college"](around:${r},${lat},${lon});
-    node["name"~"sekolah|sd |smp |sma |smk |tk |paud|madrasah|pesantren",i](around:${r},${lat},${lon});
-    way["name"~"sekolah|^sd |^smp |^sma |^smk |^tk |paud|madrasah|pesantren",i](around:${r},${lat},${lon});`,
-
-  cafe: (r, lat, lon) => `
-    node["amenity"="cafe"](around:${r},${lat},${lon});
-    node["amenity"="coffee_shop"](around:${r},${lat},${lon});
-    node["name"~"cafe|kafe|coffee|kopi|roastery|espresso|brew",i](around:${r},${lat},${lon});
-    way["name"~"cafe|kafe|coffee|kopi|roastery",i](around:${r},${lat},${lon});`,
-
-  mall: (r, lat, lon) => `
-    node["shop"="mall"](around:${r},${lat},${lon});
-    way["shop"="mall"](around:${r},${lat},${lon});
-    node["shop"="department_store"](around:${r},${lat},${lon});
-    way["shop"="department_store"](around:${r},${lat},${lon});
-    node["name"~"mall|plaza|^lippo|^grand indonesia|^pacific place|^central park|^living world|^summarecon|supermal",i](around:${r},${lat},${lon});
-    way["name"~"mall|plaza|supermal",i]["shop"](around:${r},${lat},${lon});`,
-
-  hospital: (r, lat, lon) => `
-    node["amenity"="hospital"](around:${r},${lat},${lon});
-    way["amenity"="hospital"](around:${r},${lat},${lon});
-    node["amenity"="clinic"](around:${r},${lat},${lon});
-    node["amenity"="doctors"](around:${r},${lat},${lon});
-    node["healthcare"~"hospital|clinic|centre"](around:${r},${lat},${lon});
-    node["name"~"rumah sakit|rs |rsia |rsud|rsup|klinik|puskesmas",i](around:${r},${lat},${lon});
-    way["name"~"rumah sakit|rs |rsia |rsud|rsup|klinik|puskesmas",i](around:${r},${lat},${lon});`,
-
-  restaurant: (r, lat, lon) => `
-    node["amenity"="restaurant"](around:${r},${lat},${lon});
-    node["amenity"="fast_food"](around:${r},${lat},${lon});
-    node["amenity"="food_court"](around:${r},${lat},${lon});
-    node["amenity"="bakery"](around:${r},${lat},${lon});
-    node["name"~"warung|warteg|wartel|rumah makan|restoran|geprek|ayam|bakso|mie|nasi|soto|padang",i](around:${r},${lat},${lon});`,
-
-  atm: (r, lat, lon) => `
-    node["amenity"="atm"](around:${r},${lat},${lon});
-    node["amenity"="bank"](around:${r},${lat},${lon});
-    way["amenity"="bank"](around:${r},${lat},${lon});
-    node["name"~"bca|bni|bri|mandiri|bsi|btu|btn|danamon|cimb|maybank|ocbc|atm",i](around:${r},${lat},${lon});`
 };
 
 // ─── STATE ───────────────────────────────────────────────────
@@ -494,41 +427,35 @@ function getCaption(type, count) {
   return tiers[tiers.length-1] || { badge:'Hasil', title:'Menarik!', sub:`Ditemukan ${count} tempat.` };
 }
 
-// ─── MAIN QUERY ──────────────────────────────────────────────
+// ─── MAIN QUERY (Google Places via Netlify Function) ─────────
 async function checkVibe() {
   if (!coords) return;
   const btn = document.getElementById('checkBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Lagi ngecek...';
+  setStatus('', '');
 
   const radius = parseInt(document.getElementById('radiusSlider').value);
-  const queryBody = QUERIES[selectedType](radius, coords.lat, coords.lon);
-  const query = `[out:json][timeout:30];\n(\n${queryBody}\n);\nout body;`;
 
   try {
-    const res = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: 'data=' + encodeURIComponent(query),
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
+    // Call our Netlify Function — API key aman di server
+    const url = `/.netlify/functions/places?lat=${coords.lat}&lon=${coords.lon}&radius=${radius}&type=${selectedType}`;
+    const res = await fetch(url);
     const data = await res.json();
-    const seen = new Set();
-    const places = [];
-    (data.elements || []).forEach(el => {
-      const name = el.tags?.name || el.tags?.['name:id'] || el.tags?.['name:en'] || el.tags?.['name:local'];
-      if (name) {
-        const key = name.toLowerCase().replace(/\s+/g,'');
-        if (!seen.has(key)) {
-          seen.add(key);
-          const dist = el.lat ? haversine(coords.lat, coords.lon, el.lat, el.lon) : null;
-          places.push({ name, dist });
-        }
-      }
+
+    if (data.error) throw new Error(data.error);
+
+    const places = (data.places || []).map(p => {
+      const name = p.displayName?.text || '(tanpa nama)';
+      const loc = p.location;
+      const dist = loc ? haversine(coords.lat, coords.lon, loc.latitude, loc.longitude) : null;
+      return { name, dist };
     });
+
     places.sort((a,b) => (a.dist ?? 99999) - (b.dist ?? 99999));
-    renderResult(places.length, radius, places.slice(0, 12));
+    renderResult(places.length, radius, places.slice(0, 20));
   } catch(e) {
-    setStatus('Gagal ambil data. Coba lagi sebentar.', 'err');
+    setStatus('Gagal ambil data: ' + e.message, 'err');
   }
 
   btn.disabled = false;
@@ -576,7 +503,7 @@ function renderResult(count, radius, places) {
 function shareResult() {
   if (!lastResult) return;
   const { count, catLabel, cap, radiusKm, locName } = lastResult;
-  const text = `🗺️ Neighborhood Vibe Checker\n\n📍 ${locName}\n🔍 ${catLabel} dalam radius ${radiusKm}km\n\nHasilnya: "${cap.title}"\n${cap.sub}\n\n${count} tempat ditemukan!\n\nCek daerahmu juga: https://wildansholeh-sys.github.io/vibe-lingkungan-lo/`;
+  const text = `🗺️ Neighborhood Vibe Checker\n\n📍 ${locName}\n🔍 ${catLabel} dalam radius ${radiusKm}km\n\nHasilnya: "${cap.title}"\n${cap.sub}\n\n${count} tempat ditemukan!\n\nCek daerahmu juga: https://vibe-lingkungan-lo.netlify.app/`;
   navigator.clipboard.writeText(text).then(() => showToast('Tersalin! Paste ke mana aja 🎉'));
 }
 
