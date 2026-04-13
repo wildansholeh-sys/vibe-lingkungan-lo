@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neighborhood Vibe Checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #222;
+  --border: #2e2e2e;
+  --text: #f0ede8;
+  --muted: #888;
+  --accent: #c8f060;
+  --accent-dim: #a8cc48;
+  --danger: #ff6b6b;
+  --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  padding: 0 0 80px;
+}
+
+/* HEADER */
+.hero {
+  padding: 60px 24px 40px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.hero-tag {
+  display: inline-block;
+  background: var(--accent);
+  color: #0f0f0f;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(36px, 8vw, 56px);
+  font-weight: 800;
+  line-height: 1.05;
+  margin-bottom: 14px;
+  letter-spacing: -0.02em;
+}
+.hero h1 span { color: var(--accent); }
+.hero p {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 420px;
+}
+
+/* MAIN FORM */
+.form-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.block-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+/* CHIPS */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 8px 16px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.chip:hover { border-color: #555; color: var(--text); }
+.chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0f0f0f;
+  font-weight: 500;
+}
+.chip .icon { font-size: 15px; }
+
+/* LOCATION */
+.loc-row { display: flex; gap: 8px; }
+.loc-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.loc-input::placeholder { color: var(--muted); }
+.loc-input:focus { border-color: var(--accent); }
+.btn-gps {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-gps:hover { border-color: var(--accent); color: var(--accent); }
+.loc-status {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+  min-height: 16px;
+}
+.loc-status.ok { color: var(--accent); }
+.loc-status.err { color: var(--danger); }
+
+/* RADIUS */
+.radius-row { display: flex; align-items: center; gap: 14px; }
+.radius-row label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 3px;
+  background: var(--border);
+  border-radius: 3px;
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+.radius-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 48px;
+  text-align: right;
+}
+
+/* CTA */
+.btn-cta {
+  width: 100%;
+  padding: 18px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f0f0f;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-cta:hover { background: var(--accent-dim); transform: translateY(-1px); }
+.btn-cta:active { transform: translateY(0); }
+.btn-cta:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+/* SPINNER */
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top-color: #0f0f0f;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* RESULT */
+.result-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: none;
+  flex-direction: column;
+  gap: 0;
+  animation: fadeUp 0.4s ease;
+}
+.result-wrap.show { display: flex; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-hero {
+  background: var(--accent);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 32px 28px 28px;
+  margin-top: 24px;
+}
+.result-badge {
+  display: inline-block;
+  background: rgba(0,0,0,0.15);
+  color: #0f0f0f;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+.result-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 7vw, 42px);
+  font-weight: 800;
+  color: #0f0f0f;
+  line-height: 1.1;
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+.result-sub {
+  font-size: 15px;
+  color: rgba(0,0,0,0.6);
+  line-height: 1.5;
+}
+
+.stats-bar {
+  background: #0f0f0f;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.stat-item {
+  padding: 20px 16px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.place-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 20px;
+}
+.place-block-title {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.place-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.place-row:last-child { border-bottom: none; }
+.place-name { color: var(--text); }
+.place-dist {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface2);
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+.btn-action {
+  padding: 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-action:hover { border-color: var(--accent); color: var(--accent); }
+
+.empty-msg {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 40px 24px 0;
+  font-size: 12px;
+  color: #444;
+}
+.footer a { color: #555; text-decoration: underline; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--accent);
+  color: #0f0f0f;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 99px;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 480px) {
+  .hero { padding: 40px 20px 28px; }
+  .form-wrap, .result-wrap { padding: 0 16px; }
+  .stats-bar { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-tag">Free Tool</div>
+  <h1>Neighborhood<br><span>Vibe</span> Checker</h1>
+  <p>Cari tahu "vibe" daerahmu — banyak padel court? masjid? kafe? Kita hitung dan kasih label yang jujur.</p>
+</div>
+
+<div class="form-wrap">
+
+  <div class="block">
+    <div class="block-label">Pilih Kategori</div>
+    <div class="chips" id="chips">
+      <button class="chip active" data-type="sports_complex"><span class="icon">🏓</span>Padel / Olahraga</button>
+      <button class="chip" data-type="mosque"><span class="icon">🕌</span>Masjid</button>
+      <button class="chip" data-type="school"><span class="icon">🏫</span>Sekolah</button>
+      <button class="chip" data-type="cafe"><span class="icon">☕</span>Kafe</button>
+      <button class="chip" data-type="mall"><span class="icon">🛍</span>Mall</button>
+      <button class="chip" data-type="hospital"><span class="icon">🏥</span>Rumah Sakit</button>
+      <button class="chip" data-type="restaurant"><span class="icon">🍽</span>Restoran</button>
+      <button class="chip" data-type="atm"><span class="icon">🏦</span>ATM / Bank</button>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-label">Lokasi</div>
+    <div class="loc-row">
+      <input class="loc-input" id="locInput" type="text" placeholder="Ketik nama daerah... (e.g. Kemang, Jakarta)" />
+      <button class="btn-gps" id="gpsBtn" onclick="useGPS()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        GPS
+      </button>
+    </div>
+    <div class="loc-status" id="locStatus"></div>
+  </div>
+
+  <div class="block">
+    <div class="block-label">Radius Pencarian</div>
+    <div class="radius-row">
+      <label>Jarak</label>
+      <input type="range" id="radiusSlider" min="500" max="5000" step="500" value="1500"
+        oninput="document.getElementById('radiusVal').textContent=(Math.round(this.value/100)/10)+'km'">
+      <span class="radius-val" id="radiusVal">1.5km</span>
+    </div>
+  </div>
+
+  <button class="btn-cta" id="checkBtn" onclick="checkVibe()" disabled>
+    Cek Vibe Sekarang
+  </button>
+
+</div>
+
+<div class="result-wrap" id="resultWrap">
+  <div class="result-hero" id="resultHero">
+    <div class="result-badge" id="resBadge">Hasil</div>
+    <div class="result-title" id="resTitle">—</div>
+    <div class="result-sub" id="resSub">—</div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-num" id="statCount">0</div><div class="stat-lbl">tempat</div></div>
+    <div class="stat-item"><div class="stat-num" id="statRadius">—</div><div class="stat-lbl">radius</div></div>
+    <div class="stat-item"><div class="stat-num" id="statDensity">—</div><div class="stat-lbl">per km²</div></div>
+  </div>
+  <div class="place-block">
+    <div class="place-block-title" id="placeTitle">Tempat ditemukan</div>
+    <div id="placeList"></div>
+    <div class="action-row">
+      <button class="btn-action" onclick="shareResult()">Salin & Bagikan</button>
+      <button class="btn-action" onclick="resetAll()">Cek Lagi</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Data dari <a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a> via Overpass API — gratis & open source.<br>
+  Coverage terbaik di kota-kota besar Indonesia.
+</div>
+
+<div class="toast" id="toast">Tersalin!</div>
+
+<script>
+const CAPTIONS = {
+  sports_complex: [
+    { min:0, max:1, badge:"Aman dari padel", title:"Santai aja, bro", sub:"Di sini kayaknya masih tenang, belum terjangkau wabah padel. Nikmati selagi bisa." },
+    { min:2, max:4, badge:"Waspada padel", title:"Mulai ada gejalanya...", sub:"Tetangga udah mulai beli raket nih. Hati-hati, ini menular." },
+    { min:5, max:9, badge:"Zona Padel", title:"Si Paling Padel", sub:"Daerahmu udah jadi markas komunitas padel. Kalau belum main, kamu minoritas." },
+    { min:10, max:999, badge:"Republik Padel", title:"PADEL REPUBLIC", sub:"Ini bukan perumahan, ini kompleks olahraga. Siap-siap diajak main tiap Sabtu pagi." }
+  ],
+  mosque: [
+    { min:0, max:1, badge:"Cari masjid dulu", title:"Agak jauh masjidnya", sub:"Mungkin perlu jalan dikit buat sholat Jumat. Cek Google Maps dulu ya." },
+    { min:2, max:4, badge:"Cukup religius", title:"Lumayan spiritual", sub:"Suara adzan masih kedengeran tipis-tipis dari dapur. Alhamdulillah." },
+    { min:5, max:9, badge:"Islami Zone", title:"Anak Islami", sub:"Adzan dari segala penjuru. HP alarm buat apa kalau ada Subuh dari 5 masjid?" },
+    { min:10, max:999, badge:"Makkah Jakarta", title:"PUSAT DAKWAH DUNIA", sub:"Subuh ga perlu alarm. Adzan dari 10 arah sekaligus. Lo udah hidup di dimensi lain." }
+  ],
+  school: [
+    { min:0, max:1, badge:"Sepi pelajar", title:"Sekolah di mana nih?", sub:"Anak-anak di sini sekolahnya jauh banget. Ojek sekolah laris manis." },
+    { min:2, max:4, badge:"Education zone", title:"Lumayan edukatif", sub:"Ada beberapa sekolah. Strategis buat yang punya anak, macet dikit ya wajar." },
+    { min:5, max:9, badge:"Kawasan pelajar", title:"Si Paling Akademis", sub:"Tiap pagi macet antar-jemput. Lo hafal lagu kebangsaan semua sekolah di sini." },
+    { min:10, max:999, badge:"Superblock Edukasi", title:"KOTA PELAJAR", sub:"Ini Jogja versi baru? Daerah lo padat banget sama institusi pendidikan." }
+  ],
+  cafe: [
+    { min:0, max:1, badge:"Anti mainstream", title:"Healing di mana?", sub:"Daerah ini belum kena demam nongkrong. Kopi sachet jadi teman setia." },
+    { min:2, max:5, badge:"Kafe zone", title:"Cukup untuk healing", sub:"Pilihan ada, tapi belum overwhelmed. Masih bisa duduk tanpa waiting list." },
+    { min:6, max:12, badge:"WFC Zone", title:"Si Paling Work from Cafe", sub:"Laptop di mana-mana. Orang kerja tapi background-nya estetik. Produktif atau pura-pura?" },
+    { min:13, max:999, badge:"Barista Nation", title:"COFFEE REPUBLIC", sub:"Satu blok bisa ada 5 kafe. Pilih yang colokan-nya banyak dan Wi-Fi-nya kenceng." }
+  ],
+  mall: [
+    { min:0, max:0, badge:"Anti konsumerisme", title:"Jauh dari peradaban", sub:"Mall terdekat butuh ojek 30 menit. Dompet aman, tapi hiburan terbatas." },
+    { min:1, max:2, badge:"Mall zone", title:"Cukup untuk weekend", sub:"Ada pilihan, tapi masih bisa nahan diri dari belanja impulsif. Sehat!" },
+    { min:3, max:999, badge:"Zona Hedon", title:"Si Paling Hedon", sub:"Lo dikelilingi mall. Dompet lo dalam bahaya besar setiap hari. Semoga kuat iman." }
+  ],
+  hospital: [
+    { min:0, max:0, badge:"Sehat wajib", title:"Bismillah aja", sub:"RS terdekat agak jauh. Jaga kesehatan baik-baik, olahraga, makan sayur." },
+    { min:1, max:3, badge:"Faskes ada", title:"Aman, ada faskes", sub:"Ada beberapa RS di dekat. Tenang kalau ada keadaan darurat." },
+    { min:4, max:999, badge:"Medical Hub", title:"Kawasan Medis", sub:"Daerah lo jadi pusat kesehatan. Entah ini bagus karena fasilitas, atau... mengerikan." }
+  ],
+  restaurant: [
+    { min:0, max:2, badge:"Masak di rumah", title:"Masak sendiri bro", sub:"Pilihan makan agak terbatas. Indomie jadi sahabat setia. Minimal sehat." },
+    { min:3, max:8, badge:"Foody Zone", title:"Perut aman", sub:"Banyak pilihan makan. Diet? Susah banget di sini, jujur aja." },
+    { min:9, max:999, badge:"Surganya Perut", title:"FOOD PARADISE", sub:"Susah ngurangin makan kalau tiap 50 meter ada warteg, geprek, atau bakso." }
+  ],
+  atm: [
+    { min:0, max:1, badge:"Cashless zone", title:"Cashless atau susah", sub:"ATM langka di sini. Semoga lo selalu punya saldo GoPay dan OVO." },
+    { min:2, max:5, badge:"Banking zone", title:"Lumayan banyak", sub:"Cari ATM ga susah-susah amat. Antrian masih wajar, admin bank ramah." },
+    { min:6, max:999, badge:"Financial District", title:"FINANCIAL DISTRICT", sub:"ATM di mana-mana. Uang keluar, uang keluar, uang keluar... dompet menangis." }
+  ]
+};
+
+const OVERPASS_QUERIES = {
+  sports_complex: ['node["leisure"="sports_centre"]','node["sport"="padel"]','node["leisure"="pitch"]["sport"="padel"]','node["name"~"padel|sport|fitness|gym",i]'],
+  mosque: ['node["amenity"="place_of_worship"]["religion"="muslim"]','way["amenity"="place_of_worship"]["religion"="muslim"]','node["name"~"masjid|musholla|surau|langgar",i]'],
+  school: ['node["amenity"="school"]','way["amenity"="school"]','node["amenity"="kindergarten"]'],
+  cafe: ['node["amenity"="cafe"]','node["amenity"="coffee_shop"]'],
+  mall: ['node["shop"="mall"]','way["shop"="mall"]','node["name"~"mall|plaza|square|centre",i]["shop"]','way["name"~"mall|plaza|square",i]["shop"]'],
+  hospital: ['node["amenity"="hospital"]','node["amenity"="clinic"]','way["amenity"="hospital"]'],
+  restaurant: ['node["amenity"="restaurant"]','node["amenity"="fast_food"]','node["amenity"="food_court"]'],
+  atm: ['node["amenity"="atm"]','node["amenity"="bank"]']
+};
+
+let selectedType = 'sports_complex';
+let coords = null;
+let lastResult = null;
+
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    selectedType = c.dataset.type;
+  });
+});
+
+const locInput = document.getElementById('locInput');
+locInput.addEventListener('keydown', e => { if (e.key === 'Enter') geocode(); });
+locInput.addEventListener('blur', () => { if (locInput.value.trim()) geocode(); });
+locInput.addEventListener('input', () => {
+  coords = null;
+  setStatus('', '');
+  updateBtn();
+});
+
+function setStatus(msg, type) {
+  const el = document.getElementById('locStatus');
+  el.textContent = msg;
+  el.className = 'loc-status' + (type ? ' ' + type : '');
+}
+
+function updateBtn() {
+  document.getElementById('checkBtn').disabled = !coords;
+}
+
+async function geocode() {
+  const q = locInput.value.trim();
+  if (!q) return;
+  setStatus('Mencari lokasi...', '');
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&accept-language=id`);
+    const data = await res.json();
+    if (data.length) {
+      coords = { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+      const name = data[0].display_name.split(',').slice(0,3).join(', ');
+      setStatus('✓ ' + name, 'ok');
+      updateBtn();
+    } else {
+      setStatus('Lokasi tidak ditemukan. Coba nama lain.', 'err');
+    }
+  } catch {
+    setStatus('Gagal mencari lokasi. Cek koneksi internet.', 'err');
+  }
+}
+
+function useGPS() {
+  if (!navigator.geolocation) { setStatus('Browser tidak support GPS.', 'err'); return; }
+  setStatus('Mengambil koordinat GPS...', '');
+  navigator.geolocation.getCurrentPosition(async pos => {
+    coords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lon}&format=json`);
+      const data = await res.json();
+      const name = data.address ? (data.address.suburb || data.address.city || data.address.town || 'Lokasimu') : 'Lokasimu';
+      locInput.value = name + ', ' + (data.address?.city || data.address?.state || '');
+      setStatus('✓ GPS berhasil: ' + name, 'ok');
+    } catch {
+      locInput.value = coords.lat.toFixed(4) + ', ' + coords.lon.toFixed(4);
+      setStatus('✓ GPS berhasil', 'ok');
+    }
+    updateBtn();
+  }, () => {
+    setStatus('Gagal ambil GPS. Izinkan akses lokasi di browser.', 'err');
+  });
+}
+
+async function checkVibe() {
+  if (!coords) return;
+  const btn = document.getElementById('checkBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Lagi ngecek...';
+
+  const radius = parseInt(document.getElementById('radiusSlider').value);
+  const queries = OVERPASS_QUERIES[selectedType];
+  const parts = queries.map(q => `${q}(around:${radius},${coords.lat},${coords.lon});`).join('\n');
+  const query = `[out:json][timeout:30];\n(\n${parts}\n);\nout body;`;
+
+  try {
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(query),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+    const data = await res.json();
+    const seen = new Set();
+    const places = [];
+    (data.elements || []).forEach(el => {
+      const name = el.tags?.name || el.tags?.['name:id'] || el.tags?.['name:en'];
+      if (name && !seen.has(name.toLowerCase())) {
+        seen.add(name.toLowerCase());
+        const dist = el.lat ? haversine(coords.lat, coords.lon, el.lat, el.lon) : null;
+        places.push({ name, dist });
+      }
+    });
+    places.sort((a, b) => (a.dist ?? 9999) - (b.dist ?? 9999));
+    renderResult(places.length, radius, places.slice(0, 10));
+  } catch(e) {
+    setStatus('Gagal ambil data. Coba lagi beberapa detik.', 'err');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Cek Vibe Sekarang';
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
+
+function getCaption(type, count) {
+  const tiers = CAPTIONS[type] || [];
+  for (const t of tiers) if (count >= t.min && count <= t.max) return t;
+  return tiers[tiers.length-1] || { badge:'Hasil', title:'Menarik!', sub:`Ditemukan ${count} tempat.` };
+}
+
+function renderResult(count, radius, places) {
+  const cap = getCaption(selectedType, count);
+  const chip = document.querySelector('.chip.active');
+  const catLabel = chip ? chip.textContent.trim() : 'tempat';
+  const radiusKm = Math.round(radius/100)/10;
+  const area = Math.PI * (radiusKm**2);
+  const density = count > 0 ? Math.round(count/area*10)/10 : 0;
+
+  document.getElementById('resBadge').textContent = cap.badge;
+  document.getElementById('resTitle').textContent = cap.title;
+  document.getElementById('resSub').textContent = cap.sub;
+  document.getElementById('statCount').textContent = count;
+  document.getElementById('statRadius').textContent = radiusKm + 'km';
+  document.getElementById('statDensity').textContent = density;
+
+  const list = document.getElementById('placeList');
+  if (places.length > 0) {
+    document.getElementById('placeTitle').textContent = 'Tempat yang ditemukan';
+    list.innerHTML = places.map(p => {
+      const d = p.dist !== null ? (p.dist < 1000 ? p.dist+'m' : (Math.round(p.dist/100)/10)+'km') : '?';
+      return `<div class="place-row"><span class="place-name">${p.name}</span><span class="place-dist">${d}</span></div>`;
+    }).join('');
+  } else {
+    document.getElementById('placeTitle').textContent = '';
+    list.innerHTML = '<div class="empty-msg">Tidak ada tempat terdaftar di OpenStreetMap dalam radius ini.<br>Data OSM mungkin belum lengkap untuk daerah ini.</div>';
+  }
+
+  lastResult = { count, catLabel, cap, radiusKm, locationName: locInput.value };
+  const wrap = document.getElementById('resultWrap');
+  wrap.classList.add('show');
+  setTimeout(() => wrap.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+function shareResult() {
+  if (!lastResult) return;
+  const { count, catLabel, cap, radiusKm, locationName } = lastResult;
+  const text = `🗺️ Neighborhood Vibe Checker\n\n📍 ${locationName}\n🔍 ${catLabel} dalam radius ${radiusKm}km\n\nHasilnya: "${cap.title}"\n${cap.sub}\n\n${count} tempat ditemukan!\n\n#NeighborhoodVibe #VibeCheck`;
+  navigator.clipboard.writeText(text).then(() => showToast('Tersalin! Paste ke mana aja 🎉'));
+}
+
+function resetAll() {
+  document.getElementById('resultWrap').classList.remove('show');
+  locInput.value = '';
+  coords = null;
+  setStatus('', '');
+  updateBtn();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
