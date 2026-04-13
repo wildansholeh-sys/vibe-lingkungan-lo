@@ -2,6 +2,14 @@ exports.handler = async function(event) {
   const { lat, lon, radius, type } = event.queryStringParameters;
   const key = process.env.GOOGLE_PLACES_KEY;
 
+  if (!key) {
+    return {
+      statusCode: 500,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: 'API key tidak ditemukan di environment variable' })
+    };
+  }
+
   const typeMap = {
     padel: 'sports_complex',
     mosque: 'mosque',
@@ -27,26 +35,29 @@ exports.handler = async function(event) {
     }
   };
 
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': key,
-        'X-Goog-FieldMask': 'places.displayName,places.location'
-      },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': key,
+      'X-Goog-FieldMask': 'places.displayName,places.location'
+    },
+    body: JSON.stringify(body)
+  });
+
+  const text = await res.text();
+
+  if (!res.ok) {
     return {
-      statusCode: 200,
+      statusCode: res.status,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify(data)
-    };
-  } catch(e) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: e.message })
+      body: JSON.stringify({ error: text })
     };
   }
+
+  return {
+    statusCode: 200,
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    body: text
+  };
 };
